@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+
+  web:
+    build:
+      dockerfile: dockerfile
+      context: .
+    image: jl/flask_server
+    container_name: flask_server_category
+
+    ports:
+        - 5000:5000
