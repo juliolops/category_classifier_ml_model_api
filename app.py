@@ -3,6 +3,11 @@ from flask_restx import Resource, Api, fields
 import pandas as pd
 from toolkit_model.preprocessing import *
 import pickle
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import f1_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
 
 app = Flask(__name__)
 api = Api(app)
@@ -119,17 +124,57 @@ class database(Resource):
 
         else:
 
-            filename = 'model/category_model.pickle'
+            return jsonify({"model status":"Model isn't trained yet, request train endpoint"})
 
-            category_model = pickle.load(open(filename, 'rb'))
 
-            predict = category_model.predict(df_input)
+@api.route("/train")
+class database(Resource):
 
-            predict_proba = category_model.predict_proba(df_input)
+    def get(self):
 
-            predict_proba = [max(i) for i in predict_proba.tolist()]
+        #load data
+        df_input = pd.read_csv("data/category_dataset.csv")
+        df_input = df_input[["query","search_page","position","title","concatenated_tags","price","weight","express_delivery","minimum_quantity","view_counts","category"]] 
+        df_input = df_input.dropna()
 
-            return jsonify({"class_pred":predict.tolist(),"class_proba":predict_proba})
+        #Preprossecing Data
+        df_input["query_cleaned"] = df_input["query"].apply(lambda x: text_cleaner(x))
+        df_input["concatenated_tags_cleaned"] = df_input["concatenated_tags"].apply(lambda x: text_cleaner(x))
+        df_input["title_cleaned"] = df_input["title"].apply(lambda x: text_cleaner(x))
+
+
+        df_input["query_cleaned_modified"] = df_input["query_cleaned"].apply(lambda x: text_categorizer(text=x,labels=words_processing_query))
+        df_input["concatenated_tags_cleaned_modified"] = df_input["concatenated_tags_cleaned"].apply(lambda x: text_categorizer(text=x,labels=words_processing_query))
+        df_input["title_cleaned_modified"] = df_input["title_cleaned"].apply(lambda x: text_categorizer(text=x,labels=words_processing_query))
+
+        df_input = create_dummies(df_input,list_dummies)
+        df_input.drop(['query_cleaned_modified',
+                        'concatenated_tags_cleaned_modified',
+                        'title_cleaned_modified',
+                        'query_cleaned',
+                        'concatenated_tags_cleaned',
+                        'title_cleaned',"title","concatenated_tags","query"],inplace=True,axis=1)
+
+
+        X = df_input.drop(["category"],axis=1)
+        y = df_input["category"].values
+
+
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+        clf_rf = RandomForestClassifier().fit(X_train, y_train)
+
+        y_pred =  clf_rf.predict(X_test)
+
+        global category_model
+
+        category_model = clf_rf
+
+        return jsonify({"model status":"Model is trained",
+                        "f1_score_macro":f1_score(y_test, y_pred, average='macro'),
+                        "precision_macro":precision_score(y_test, y_pred, average='macro'),
+                        "recall_macro":recall_score(y_test, y_pred, average='macro')})
 
 
 if __name__ == '__main__':

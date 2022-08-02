@@ -8,13 +8,15 @@ This project is a API to classify products informations into 6 classes with mach
 
 ## Swagger UI
 
+![image](https://user-images.githubusercontent.com/40969977/182303397-0b75c291-d3b9-4891-a5dd-cb2aaf556f8c.png)
 ---
 
 ## Technologies
 
 - Flask
-- MySQL
 - Docker
+- Machine Learning 
+- Jupyter Notebook
 
 ---
 
@@ -22,7 +24,7 @@ This project is a API to classify products informations into 6 classes with mach
 
 ```docker-compose up command```
 
-## Endpoint to insert values into project_name.table_name (POST)
+## Endpoint to predict classes (POST)
 
 ```http://0.0.0.0:5000/predict```
 
@@ -33,7 +35,7 @@ This route receive post requests with products data and its response is a json w
 Example of json to predict scores
 
 {
-  "query": [
+  "query": [      
      "espirito santo","cartao de visita","expositor de esmaltes","medidas lencol para berco americano"
   ],
   "search_page": [
@@ -85,4 +87,73 @@ Example of response
 }
 
 ```
+
+```
+Example of response if the model isn't trained 
+
+{
+  "model status": "Model isn't trained yet, request train endpoint"
+}
+```
 ---
+
+## Endpoint to train the machine learning model (GET)
+
+```http://0.0.0.0:5000/train```
+
+This route receive **get request** and train the machine learning model
+
+
+```
+Example of response
+
+{
+
+  "model status": "Model is trained",
+  "f1_score_macro": 0.53,
+  "precision_macro": 0.65,
+  "recall_macro": 0.50
+}
+```
+
+
+
+---
+# Tests
+
+The python file called **test_api.py** in the root directory has 2 aplication tests (one for each route). These tests are executed by the **library pytest** using the command **py.test**. You have to run **py.test** in the root directory. 
+
+
+---
+# Model Development
+
+Results of the model (Random Forests)
+
+![image](https://user-images.githubusercontent.com/40969977/182295562-74171382-36ef-4bf1-839a-4a92fa905542.png)
+
+
+---
+
+## Directory *training*
+
+This directory has the Jupyter notebook which was used to develop the machine learning model 
+
+
+---
+
+## Directory *Data* 
+
+This directory has the data used to develop the machine learning model 
+
+
+---
+
+## Module *toolkit_model*
+
+This module has all functions used in the preprocessing of the model 
+
+---
+
+## Dependencies 
+
+requirements.txt has all the dependencies of this aplication
