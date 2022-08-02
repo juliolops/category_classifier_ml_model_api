@@ -121,7 +121,7 @@ Example of response
 ---
 # Tests
 
-The python file called **test_api.py** in the root directory has 2 aplication tests (one for each route). These tests are executed by the **library pytest** using the command **py.test**. You have to run **py.test** in the root directory. 
+The python file called **test_api.py** in the root directory has 2 aplication tests (one for each route). These tests are executed by the **library pytest** using the command **py.test**. You have to run **py.test** in the root directory. These tests verify if the 2 endpoints return code 200 (status okay).
 
 
 ---
@@ -136,7 +136,7 @@ Results of the model (Random Forests)
 
 ## Directory *training*
 
-This directory has the Jupyter notebook which was used to develop the machine learning model 
+This directory has the Jupyter notebook called *model_development_pipeline.ipynb* which was used to develop the machine learning model 
 
 
 ---
